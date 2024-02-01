@@ -4,6 +4,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 application.properties
+keystore.p12
 
 ### STS ###
 .apt_generated
