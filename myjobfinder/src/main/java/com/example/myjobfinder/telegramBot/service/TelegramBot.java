@@ -1,7 +1,9 @@
 package com.example.myjobfinder.telegramBot.service;
 
+import com.example.myjobfinder.parser.Parser;
 import com.example.myjobfinder.telegramBot.config.BotConfig;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -12,6 +14,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 @AllArgsConstructor
 public class TelegramBot extends TelegramLongPollingBot {
     private final BotConfig botConfig;
+
+    @Autowired
+    private Parser parser;
 
     @Override
     public String getBotUsername() {
@@ -34,6 +39,10 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/start":
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
+                case "/parse":
+                    parser.getVacancies();
+                    break;
+
             }
         }
 

@@ -1,10 +1,10 @@
 package com.example.myjobfinder.authorizer;
 
-import com.example.myjobfinder.authorizer.AuthorizerConfig;
 import org.springframework.boot.configurationprocessor.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.example.myjobfinder.authorizer.AuthorizerConfig;
 
 
 import javax.net.ssl.HttpsURLConnection;
