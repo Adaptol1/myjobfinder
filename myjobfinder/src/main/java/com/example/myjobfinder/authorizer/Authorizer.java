@@ -1,21 +1,16 @@
 package com.example.myjobfinder.authorizer;
 
 import org.springframework.boot.configurationprocessor.json.JSONObject;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import com.example.myjobfinder.authorizer.AuthorizerConfig;
-
-
 import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.util.stream.Collectors;
 
-@Service
+@Controller
 public class Authorizer {
 
     private AuthorizerConfig config;
@@ -25,15 +20,22 @@ public class Authorizer {
         this.config = config;
     }
 
+    public AuthorizerConfig getConfig() {
+        return config;
+    }
+
     public String authorize ()
     {
         return "https://hh.ru/oauth/authorize?response_type=code&client_id=" + config.getClientID();
     }
 
     @GetMapping("/")
-    public void getCode(@RequestParam String code)
+    public void setCodeAndTokens(@RequestParam String code)
     {
         config.setCode(code);
+        getTokens();
+        System.out.println(config.getAccessToken());
+        System.out.println(config.getRefreshToken());
     }
 
     public void getTokens()
@@ -50,14 +52,7 @@ public class Authorizer {
             HttpsURLConnection request = (HttpsURLConnection) new URL(url).openConnection();
             request.setRequestMethod("POST");
             request.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-
             request.setDoOutput(true);
-//            OutputStream outStream = request.getOutputStream();
-//            OutputStreamWriter outStreamWriter = new OutputStreamWriter(outStream, charset);
-//            outStreamWriter.write(requestData);
-//            outStreamWriter.flush();
-//            outStreamWriter.close();
-//            outStream.close();
             request.connect();
             request.getContent();
 

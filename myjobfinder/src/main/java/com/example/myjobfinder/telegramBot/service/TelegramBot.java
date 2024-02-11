@@ -1,14 +1,21 @@
 package com.example.myjobfinder.telegramBot.service;
 
+import com.example.myjobfinder.authorizer.Authorizer;
+import com.example.myjobfinder.model.Vacancy;
+import com.example.myjobfinder.model.VacancyRepository;
 import com.example.myjobfinder.parser.Parser;
+import com.example.myjobfinder.responder.Responder;
 import com.example.myjobfinder.telegramBot.config.BotConfig;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+
+import java.util.Optional;
 
 @Component
 @AllArgsConstructor
@@ -16,7 +23,16 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final BotConfig botConfig;
 
     @Autowired
+    private Authorizer authorizer;
+
+    @Autowired
     private Parser parser;
+
+    @Autowired
+    private Responder responder;
+
+    @Autowired
+    VacancyRepository vacancyRepository;
 
     @Override
     public String getBotUsername() {
@@ -39,8 +55,20 @@ public class TelegramBot extends TelegramLongPollingBot {
                 case "/start":
                     startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
+                case "/commands":
+                    break;
                 case "/parse":
                     parser.getVacancies();
+                    break;
+                case "/authorize":
+                    String authorizeLink = authorizer.authorize();
+                    sendMessage(chatId, authorizeLink);
+                    break;
+                case "/respond":
+                    Optional<Vacancy> optionalVacancy = vacancyRepository.findById(91902653);
+                    HttpStatusCode statusCode =
+                            responder.respondVacancy(optionalVacancy.get(), authorizer.getConfig().accessToken);
+                    sendMessage(chatId, statusCode.toString());
                     break;
 
             }
@@ -49,7 +77,8 @@ public class TelegramBot extends TelegramLongPollingBot {
     }
 
     private void startCommandReceived(Long chatId, String name) {
-        String answer = "Hi, " + name + ", nice to meet you!";
+        String answer = "Hi, " + name + ", nice to meet you!\n" +
+                "Type \"commands\" to view list of available commands";
         sendMessage(chatId, answer);
     }
 
@@ -60,7 +89,7 @@ public class TelegramBot extends TelegramLongPollingBot {
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
-
+            e.printStackTrace();
         }
     }
 }
