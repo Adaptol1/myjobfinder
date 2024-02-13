@@ -20,18 +20,23 @@ public class Responder
     private VacancyRepository vacancyRepository;
 
     private String defaultMessage = "Здравствуйте, %s! Меня заинтересовала вакансия \"%s\" в Вашей компании.\n" +
-            "Я заинтересован в профессиональном росте и получении нового опыта в сфере IT и хотел бы стать частью Вашей команды. " +
+            "Я заинтересован в профессиональном росте и получении нового опыта как Java-разработчик, " +
+            "поэтому хотел бы стать частью Вашей команды. " +
             "Я проживаю в Уфе и поэтому мне подойдёт только удалённый формат работы. " +
-            "О себе могу сказать, что я трудолюбий, усидчивый - способен долго работать " +
-            "над одной задачей, владею технологиями, перечисленными в графе \"стек\", на данный" +
-            " момент имею почти год коммерческого опыта и 2 года опыта разработки на Java в целом. " +
+            "О себе могу сказать, что я трудолюбивый, всегда довожу свои задачи до логического конца, " +
+            " владею технологиями, перечисленными в графе \"стек\", на данный" +
+            " момент имею год коммерческого опыта как инженер-программист и 2 года опыта разработки на Java в целом. " +
             "Заинтересован в дальнейшем росте и развитии в рамках профессии.\n" +
+            "Вот ссылка на мой GitHub: https://github.com/Adaptol1\n" +
             "Буду благодарен за обратную связь.";
 
     private String defaultResumeId = "b2164e6aff0b7d7fbf0039ed1f43496e6e6538";
 
-    public HttpStatusCode respondVacancy (Vacancy vacancy, String accessToken)
+    public String respondVacancy (Vacancy vacancy, String accessToken)
     {
+        if (vacancy.getIssent())
+            return "this vacancy is already responded";
+
         String message = String.format(
                 defaultMessage,
                 vacancy.getEmployer(),
@@ -51,6 +56,8 @@ public class Responder
                 request,
                 new ParameterizedTypeReference<Void>() {
                 });
-        return response.getStatusCode();
+        vacancy.setIssent(true);
+        vacancyRepository.save(vacancy);
+        return response.getStatusCode().toString();
     }
 }

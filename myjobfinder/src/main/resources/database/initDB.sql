@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS vacancies
 (
     id                INTEGER   PRIMARY KEY,
-    employer          VARCHAR(50)  NOT NULL,
+    employer          VARCHAR(200) NOT NULL,
     name              VARCHAR(200) NOT NULL,
     hasTest           BOOLEAN      NOT NULL,
     salaryFrom        INTEGER,

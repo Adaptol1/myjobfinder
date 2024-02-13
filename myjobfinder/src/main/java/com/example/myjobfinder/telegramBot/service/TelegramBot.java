@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Component
@@ -64,11 +65,17 @@ public class TelegramBot extends TelegramLongPollingBot {
                     String authorizeLink = authorizer.authorize();
                     sendMessage(chatId, authorizeLink);
                     break;
-                case "/respond":
-                    Optional<Vacancy> optionalVacancy = vacancyRepository.findById(91902653);
-                    HttpStatusCode statusCode =
-                            responder.respondVacancy(optionalVacancy.get(), authorizer.getConfig().accessToken);
-                    sendMessage(chatId, statusCode.toString());
+                case "/respondWithoutTest":
+                    Iterable<Vacancy> vacancyIterable = vacancyRepository.findAll();
+                    for (Vacancy vacancy : vacancyIterable)
+                    {
+                        if (!vacancy.getHastest())
+                        {
+                            String message = vacancy.getId().toString() + ": " +
+                                    responder.respondVacancy(vacancy, authorizer.getConfig().accessToken);
+                            sendMessage(chatId, message);
+                        }
+                    }
                     break;
 
             }

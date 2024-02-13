@@ -18,7 +18,7 @@ public class Parser
 {
     private int found;
 
-    private int pages;
+    private int pages = 1;
 
     private int currentPage;
 
@@ -29,36 +29,46 @@ public class Parser
     @Transactional
     public void getVacancies ()
     {
-        String url = "https://api.hh.ru/vacancies?text=NAME:(Java and NOT JavaScript and NOT Frontend) and DESCRIPTION:(Java) " +
+        String defaultUrl = "https://api.hh.ru/vacancies?page=%s&text=NAME:(Java and NOT JavaScript and NOT Frontend) and DESCRIPTION:(Java) " +
                     "&employment=full&schedule=remote&professional_role=96&currency=RUR&salary=80000" +
                     "&period=30&search_field=name&search_field=description&experience=between1And3&experience=noExperience";
         RestTemplate restTemplate = new RestTemplate();
-        try
+        for (currentPage = 0; currentPage < pages; currentPage++)
         {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    null,
-                    new ParameterizedTypeReference<String>(){});
-            JSONObject responseBody = new JSONObject(response.getBody());
-            found = (int) responseBody.get("found");
-            pages = (int) responseBody.get("pages");
-            currentPage = (int) responseBody.get("page");
-            perPage = (int) responseBody.get("per_page");
-            JSONArray items = responseBody.getJSONArray("items");
-            for(int i = 0; i < items.length(); i++)
+            try
             {
-                JSONObject item = items.getJSONObject(i);
-                vacancyRepository.save(parseVacancy(item));
+                String url = String.format(defaultUrl, currentPage);
+                ResponseEntity<String> response = restTemplate.exchange(
+                        url,
+                        HttpMethod.GET,
+                        null,
+                        new ParameterizedTypeReference<String>(){});
+                JSONObject responseBody = new JSONObject(response.getBody());
+
+                if (currentPage == 0)
+                {
+                    found = (int) responseBody.get("found");
+                    pages = (int) responseBody.get("pages");
+                }
+
+                JSONArray items = responseBody.getJSONArray("items");
+                for(int i = 0; i < items.length(); i++)
+                {
+                    JSONObject item = items.getJSONObject(i);
+                    Vacancy vacancy = parseVacancy(item);
+
+                    if (!vacancyRepository.existsById(vacancy.getId()))
+                        vacancyRepository.save(vacancy);
+
+                }
+                System.out.println(currentPage);
+
             }
-
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
         }
-        catch (Exception e)
-        {
-            e.printStackTrace();
-        }
-
-
     }
     private Vacancy parseVacancy (JSONObject item)
     {
