@@ -9,11 +9,11 @@ import org.springframework.context.annotation.Configuration;
 public class AuthorizerConfig
 {
     @Value("${clientID}")
-    private String clientID = "HK7CAQIRJHKQBMR1L2KOHBJ1BLPP1N03GIV20O5JEUQIQTI43L6E32CHP8VP0H93";
+    private String clientID;
     @Value("${clientSecret}")
-    private String clientSecret = "MMNL64F3K647ALJ99OGV51OE70VQA5RH0H7ILG9OFQJBRP30V770M61KFP9LI3SJ";
+    private String clientSecret;
 
-    private String code = "LDV7VKAD7E1C0M97LLU9OI3GHEROVS92M0CG1V5ADVREK734QAIPNPOQSB1BM1BJ";
+    private String code;
 
     public String accessToken;
 
